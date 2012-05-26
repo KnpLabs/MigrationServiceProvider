@@ -1,6 +1,6 @@
 <?php
 
-namespace Knp;
+namespace Knp\Migration;
 
 use Doctrine\DBAL\Schema\Schema;
 use Silex\Application;

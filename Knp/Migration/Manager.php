@@ -4,35 +4,36 @@ namespace Knp\Migration;
 
 use Silex\Application;
 use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Connection;
 use Symfony\Component\Finder\Finder;
 
 class Manager
 {
-    private $app;
+    private $application;
 
     private $schema;
 
-    private $conn;
+    private $connection;
 
     private $current_version = null;
 
     private $migration_infos = array();
 
-    public function __construct(Application $app, Schema $schema, Finder $finder = null)
+    public function __construct(Connection $connection, Application $application, Finder $finder)
     {
-        $this->schema   = $schema;
-        $this->toSchema = clone($schema);
-        $this->app      = $app;
-        $this->conn     = $app['db'];
-        $this->finder   = $finder ?: new Finder();
+        $this->schema      = $connection->getSchemaManager()->createSchema();
+        $this->toSchema    = clone($this->schema);
+        $this->connection  = $connection;
+        $this->finder      = $finder;
+        $this->application = $application;
     }
 
     private function buildSchema(Schema $schema)
     {
-        $queries = $this->schema->getMigrateToSql($schema, $this->conn->getDatabasePlatform());
+        $queries = $this->schema->getMigrateToSql($schema, $this->connection->getDatabasePlatform());
 
         foreach ($queries as $query) {
-            $this->conn->exec($query);
+            $this->connection->exec($query);
         }
     }
 
@@ -44,7 +45,6 @@ class Manager
         $finder
             ->files()
             ->name('*Migration.php')
-            ->in(__DIR__.'/../Resources/migrations')
             ->sortByName()
         ;
 
@@ -87,7 +87,7 @@ class Manager
     public function setCurrentVersion($version)
     {
         $this->current_version = $version;
-        $this->conn->executeUpdate('UPDATE schema_version SET schema_version = ?', array($version));
+        $this->connection->executeUpdate('UPDATE schema_version SET schema_version = ?', array($version));
     }
 
     public function hasVersionInfo()
@@ -104,12 +104,12 @@ class Manager
 
         $this->buildSchema($schema);
 
-        $this->conn->insert('schema_version', array('schema_version' => 0));
+        $this->connection->insert('schema_version', array('schema_version' => 0));
     }
 
     public function migrate()
     {
-        $from    = $this->conn->fetchColumn('SELECT schema_version FROM schema_version');
+        $from    = $this->connection->fetchColumn('SELECT schema_version FROM schema_version');
         $queries = array();
 
         $migrations = $this->findMigrations($from);
@@ -125,7 +125,7 @@ class Manager
         $this->buildSchema($this->toSchema);
 
         foreach ($migrations as $migration) {
-            $migration->appUp($this->app);
+            $migration->appUp($this->application);
         }
 
         $migrationInfos = array();
