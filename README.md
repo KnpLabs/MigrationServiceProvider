@@ -19,9 +19,23 @@ And I am too lazy to write a comprehensive documentation right now, so you will 
 1. [The marketplace's migrations](https://github.com/KnpLabs/marketplace/tree/master/src/Resources/migrations)
 2. [The official documentation for Doctrine's DBAL Schema Manager](http://readthedocs.org/docs/doctrine-dbal/en/latest/reference/schema-manager.html)
 
-## How it works
+## Running migrations
 
-Since there is no CLI system in Silex, everything takes place during the `before` filter. A migration consist of a single file, holding a migration class. By design, the migration file must be named something like `<version>_<migration_name>Migration.php` and located in `src/Resources/migrations`, and the class `<migration_name>Migration`. For example, if your migration adds a `bar` field to the `foo` table, and is the 5th migration of your schema, you should name your file `05_FooBarMigration.php`, and the class would be named `FooBarMigration`.
+There are two ways of running migrations
+
+### Using the `before` handler
+
+If you pass a `migration.register_before_handler` (set to `true`) when registering the service, then a `before` handler will be registered for migration to be run. It means that the migration manager will be run for each hit to your application.
+
+You might want to enable this behavior for development mode, but please don't do that in production!
+
+### Using the `knp:migration:migrate` command
+
+If you installed the console service provider right, you can use the `knp:migration:migrate` command.
+
+## Writing migrations
+
+A migration consist of a single file, holding a migration class. By design, the migration file must be named something like `<version>_<migration_name>Migration.php` and located in `src/Resources/migrations`, and the class `<migration_name>Migration`. For example, if your migration adds a `bar` field to the `foo` table, and is the 5th migration of your schema, you should name your file `05_FooBarMigration.php`, and the class would be named `FooBarMigration`.
 
 In addition to these naming conventions, your migration class must extends `Knp\Migration\AbstractMigration`, which provides a few helping method such as `getVersion` and default implementations for migration methods.
 

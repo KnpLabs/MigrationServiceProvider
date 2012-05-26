@@ -27,7 +27,9 @@ class MigrationServiceProvider implements ServiceProviderInterface
             $application->add(new MigrationCommand());
         });
 
-        $this->registerBeforeHandler($app);
+        if (isset($app['migration.register_before_handler']) && $app['migration.register_before_handler']) {
+            $this->registerBeforeHandler($app);
+        }
     }
 
     private function registerBeforeHandler($app)
