@@ -15,9 +15,11 @@ class Manager
 
     private $connection;
 
-    private $current_version = null;
+    private $currentVersion = null;
 
-    private $migration_infos = array();
+    private $migrationInfos = array();
+
+    private $migrationExecuted = 0;
 
     public function __construct(Connection $connection, Application $application, Finder $finder)
     {
@@ -75,18 +77,23 @@ class Manager
         return $this->migrationInfos;
     }
 
+    public function getMigrationExecuted()
+    {
+        return $this->migrationExecuted;
+    }
+
     public function getCurrentVersion()
     {
-        if (is_null($this->current_version)) {
-            $this->current_version = $this->conn->fetchColumn('SELECT schema_version FROM schema_version');
+        if (is_null($this->currentVersion)) {
+            $this->currentVersion = $this->conn->fetchColumn('SELECT schema_version FROM schema_version');
         }
 
-        return $this->current_version;
+        return $this->currentVersion;
     }
 
     public function setCurrentVersion($version)
     {
-        $this->current_version = $version;
+        $this->currentVersion = $version;
         $this->connection->executeUpdate('UPDATE schema_version SET schema_version = ?', array($version));
     }
 
@@ -134,6 +141,8 @@ class Manager
             if (null !== $migration->getMigrationInfo()) {
                 $migrationInfos[$migration->getVersion()] = $migration->getMigrationInfo();
             }
+
+            $this->migrationExecuted++;
         }
 
         $this->migrationInfos = $migrationInfos;

@@ -9,12 +9,22 @@ use Knp\Migration\Manager as MigrationManager;
 
 use Symfony\Component\Finder\Finder;
 
+use Knp\Console\Events as ConsoleEvents;
+use Knp\Console\Event as ConsoleEvent;
+
+use Knp\Command\MigrationCommand;
+
 class MigrationServiceProvider implements ServiceProviderInterface
 {
     public function register(Application $app)
     {
         $app['migration'] = $app->share(function() use ($app) {
             return new MigrationManager($app['db'], $app, Finder::create()->in($app['migration.path']));
+        });
+
+        $app['dispatcher']->addListener(ConsoleEvents::INIT, function(ConsoleEvent $event) {
+            $application = $event->getApplication();
+            $application->add(new MigrationCommand());
         });
 
         $this->registerBeforeHandler($app);
