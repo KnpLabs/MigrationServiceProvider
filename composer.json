@@ -1,0 +1,23 @@
+{
+    "name": "knplabs/migration-service-provider",
+    "type": "library",
+    "description": "Doctrine migration service provider for Silex",
+    "keywords": [ "doctrine2", "silex", "migration" ],
+    "homepage": "http://knplabs.com",
+    "license": "MIT",
+    "authors": [
+        {
+            "name":     "KnpLabs",
+            "homepage": "http://knplabs.com"
+        }
+    ],
+    "require": {
+        "php":              ">=5.3.2",
+        "doctrine/dbal":    ">=2.1, <2.3"
+    },
+    "autoload": {
+        "psr-0": {
+            "Knp\\": ""
+        }
+    }
+}
