@@ -1,13 +1,13 @@
 <?php
 
-namespace Knp\Provider\Service;
+namespace Knp\Provider;
 
 use Silex\ServiceProviderInterface;
 use Silex\Application;
 
 use Knp\Migration\Manager as MigrationManager;
 
-class Migration implements ServiceProviderInterface
+class MigrationServiceProvider implements ServiceProviderInterface
 {
     public function register(Application $app)
     {

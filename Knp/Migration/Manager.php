@@ -6,7 +6,7 @@ use Silex\Application;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\Finder\Finder;
 
-class Migration
+class Manager
 {
     private $app;
 
