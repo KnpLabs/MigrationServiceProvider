@@ -46,4 +46,8 @@ class MigrationServiceProvider implements ServiceProviderInterface
             }
         });
     }
+
+    public function boot()
+    {        
+    }
 }
