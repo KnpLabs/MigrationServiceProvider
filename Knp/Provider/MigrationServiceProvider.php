@@ -9,8 +9,8 @@ use Knp\Migration\Manager as MigrationManager;
 
 use Symfony\Component\Finder\Finder;
 
-use Knp\Console\Events as ConsoleEvents;
-use Knp\Console\Event as ConsoleEvent;
+use Knp\Console\ConsoleEvents;
+use Knp\Console\ConsoleEvent;
 
 use Knp\Command\MigrationCommand;
 
