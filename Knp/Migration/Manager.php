@@ -21,6 +21,8 @@ class Manager
 
     private $migrationExecuted = 0;
 
+    private $migrationsTableName = 'schema_version';
+
     public function __construct(Connection $connection, Application $application, Finder $finder)
     {
         $this->schema      = $connection->getSchemaManager()->createSchema();
@@ -28,6 +30,10 @@ class Manager
         $this->connection  = $connection;
         $this->finder      = $finder;
         $this->application = $application;
+
+        if(isset($application['migration.migrations_table_name'])) {
+            $this->migrationsTableName = $application['migration.migrations_table_name'];
+        }
     }
 
     private function buildSchema(Schema $schema)
@@ -85,7 +91,7 @@ class Manager
     public function getCurrentVersion()
     {
         if (is_null($this->currentVersion)) {
-            $this->currentVersion = $this->conn->fetchColumn('SELECT schema_version FROM schema_version');
+            $this->currentVersion = $this->conn->fetchColumn('SELECT ' . $this->migrationsTableName . ' FROM schema_version');
         }
 
         return $this->currentVersion;
@@ -94,29 +100,29 @@ class Manager
     public function setCurrentVersion($version)
     {
         $this->currentVersion = $version;
-        $this->connection->executeUpdate('UPDATE schema_version SET schema_version = ?', array($version));
+        $this->connection->executeUpdate('UPDATE ' . $this->migrationsTableName . ' SET schema_version = ?', array($version));
     }
 
     public function hasVersionInfo()
     {
-        return $this->schema->hasTable('schema_version');
+        return $this->schema->hasTable($this->migrationsTableName);
     }
 
     public function createVersionInfo()
     {
         $schema = clone($this->schema);
 
-        $schemaVersion = $schema->createTable('schema_version');
-        $schemaVersion->addColumn('schema_version', 'integer', array('unsigned' => true, 'default' => 0));
+        $schemaVersion = $schema->createTable($this->migrationsTableName);
+        $schemaVersion->addColumn($this->migrationsTableName, 'integer', array('unsigned' => true, 'default' => 0));
 
         $this->buildSchema($schema);
 
-        $this->connection->insert('schema_version', array('schema_version' => 0));
+        $this->connection->insert($this->migrationsTableName, array('schema_version' => 0));
     }
 
     public function migrate()
     {
-        $from    = $this->connection->fetchColumn('SELECT schema_version FROM schema_version');
+        $from    = $this->connection->fetchColumn('SELECT ' . $this->migrationsTableName . ' FROM schema_version');
         $queries = array();
 
         $migrations = $this->findMigrations($from);
