@@ -2,8 +2,8 @@
 
 namespace Knp\Provider;
 
-use Silex\ServiceProviderInterface;
-use Silex\Application;
+use Pimple\ServiceProviderInterface;
+use Pimple\Container;
 
 use Knp\Migration\Manager as MigrationManager;
 
@@ -16,11 +16,11 @@ use Knp\Command\MigrationCommand;
 
 class MigrationServiceProvider implements ServiceProviderInterface
 {
-    public function register(Application $app)
+    public function register(Container $app)
     {
-        $app['migration'] = $app->share(function() use ($app) {
+        $app['migration'] = function() use ($app) {
             return new MigrationManager($app['db'], $app, Finder::create()->in($app['migration.path']));
-        });
+        };
 
         $app['dispatcher']->addListener(ConsoleEvents::INIT, function(ConsoleEvent $event) {
             $application = $event->getApplication();
@@ -47,7 +47,7 @@ class MigrationServiceProvider implements ServiceProviderInterface
         });
     }
 
-    public function boot(Application $app)
-    {        
+    public function boot(Container $app)
+    {
     }
 }
